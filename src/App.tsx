@@ -11,6 +11,7 @@ import Loans from "./pages/Loans";
 import Transactions from "./pages/Transactions";
 import Repayments from "./pages/Repayments";
 import Users from "./pages/Users";
+import { LoanProvider } from "./context/LoanContext";
 function App() {
 	const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 	useEffect(() => {
@@ -36,21 +37,23 @@ function App() {
 	}
     return (
 		<BalanceProvider>
-			<Router>
-				<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-				{isAuthenticated ? <Navtop/>: null}
-					<Routes>
-						<Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
-						{!isAuthenticated && <Route path="/login" element={<Login />} />}
-						{!isAuthenticated && <Route path="/register" element={<Registration />} />}
-						{isAuthenticated && <Route path="/loans" element={<Loans/>} />}
-						{isAuthenticated && <Route path="/transactions" element={<Transactions/>} />}
-						{isAuthenticated && <Route path="/repayments" element={<Repayments/>} />}
-						{isAuthenticated && <Route path="/users" element={<Users/>} />}
-						<Route path="*" element={<Navigate to="/" />} />
-					</Routes>
-				</ThemeProvider>
-	  		</Router>
+			<LoanProvider>
+				<Router>
+					<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+					{isAuthenticated ? <Navtop/>: null}
+						<Routes>
+							<Route path="/" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />} />
+							{!isAuthenticated && <Route path="/login" element={<Login />} />}
+							{!isAuthenticated && <Route path="/register" element={<Registration />} />}
+							{isAuthenticated && <Route path="/loans" element={<Loans/>} />}
+							{isAuthenticated && <Route path="/transactions" element={<Transactions/>} />}
+							{isAuthenticated && <Route path="/repayments" element={<Repayments/>} />}
+							{isAuthenticated && <Route path="/users" element={<Users/>} />}
+							<Route path="*" element={<Navigate to="/" />} />
+						</Routes>
+					</ThemeProvider>
+				</Router>
+			</LoanProvider>
 		</BalanceProvider>
     );
 }

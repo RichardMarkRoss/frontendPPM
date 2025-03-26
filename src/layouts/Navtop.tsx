@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useBalance } from "../context/BalanceContext";
+import { useLoan } from "../context/LoanContext";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
 import {
   DropdownMenu,
@@ -23,15 +24,23 @@ interface User {
 const navigation = [
   { name: "Dashboard", to: "/" },
   { name: "Transactions", to: "/transactions" },
-  { name: "Loans", to: "/loan" },
-  { name: "Repayments", to: "/repayment" },
+  { name: "Loans", to: "/loans" },
+  { name: "Repayments", to: "/repayments" },
 ];
 
 const Navtop = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [showBalance, setShowBalance] = useState(true);
-const { balance, fetchBalance } = useBalance();
+  const [showLoan, setShowLoan] = useState(true);
+
+  const { balance, fetchBalance } = useBalance();
+  const { loans, fetchLoans } = useLoan();
+
+  const totalLoanBalance = loans.reduce(
+    (total, loan) => total + parseFloat(loan.remaining_balance),0
+  );
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     navigate("/login");
@@ -50,9 +59,11 @@ const { balance, fetchBalance } = useBalance();
   useEffect(() => {
     fetchUserData();
     fetchBalance();
+    fetchLoans();
   }, []);
 
   const balanceColor = balance > 0 ? "text-green-500" : balance < 0 ? "text-red-500" : "text-gray-200";
+  const loanColor = totalLoanBalance > 0 ? "text-orange-500" : totalLoanBalance < 0 ? "text-yellow-500" : "text-green-200";
 
   return (
     <nav className="bg-background border-b shadow-sm py-3 px-6 flex items-center justify-between">
@@ -76,12 +87,31 @@ const { balance, fetchBalance } = useBalance();
       </div>
 
       <div className="flex items-center space-x-4">
+        {/* Balance Display */}
         <div className="flex items-center gap-2">
           <span className={`font-medium ${balanceColor}`}>
             {showBalance ? `R ${balance.toFixed(2)}` : "R ••••••"}
           </span>
-          <Button variant="outline" size="icon" onClick={() => setShowBalance(!showBalance)}>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowBalance(!showBalance)}
+          >
             {showBalance ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </Button>
+        </div>
+
+        {/* Loan Display */}
+        <div className="flex items-center gap-2">
+          <span className={`font-medium ${loanColor}`}>
+            {showLoan ? `R ${totalLoanBalance.toFixed(2)}` : "R ••••••"}
+          </span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowLoan(!showLoan)}
+          >
+            {showLoan ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </Button>
         </div>
 
@@ -97,7 +127,7 @@ const { balance, fetchBalance } = useBalance();
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link to="/user">Your Profile</Link>
+              <Link to="/users">Your Profile</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>Sign out</DropdownMenuItem>
